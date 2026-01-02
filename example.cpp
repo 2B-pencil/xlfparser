@@ -119,6 +119,18 @@ std::ostream& operator<<(std::ostream& os, Token::Subtype t)
     return os;
 }
 
+std::string rebuild_formula(const std::vector<Token>& tokens, const std::string& original) {
+	std::string result;
+	result.reserve(original.size());
+    result += "=";
+	for (const auto& token : tokens) {
+		result += token.value(original);
+        if (token.type() == Token::Type::Function && token.subtype() == Token::Subtype::Start)
+            result += "(";
+	}
+	return result;
+}
+
 int main()
 {
     std::vector<std::string>inputs {
@@ -151,10 +163,30 @@ int main()
     {
         auto tokens = xlfparser::tokenize(input);
         std::cout << input << " :" << std::endl;
-        for (const auto& token: tokens)
-            std::cout << '\t' << token.value(input) << '\t' << token.type() << '\t' << token.subtype() << std::endl;
+		for (const auto& token : tokens)
+		{
+			if (token.type() == Token::Type::Function && token.subtype() == Token::Subtype::Start)
+			{
+				std::cout << '\t' << token.value(input) << "(" << '\t' << token.type() << '\t' << token.subtype() << "  // 添加显示的 (\n";
+			}
+			else if (token.type() == Token::Type::Function && token.subtype() == Token::Subtype::Stop)
+			{
+				std::cout << '\t' << ")" << '\t' << token.type() << '\t' << token.subtype() << "  // 显示的 )\n";
+			}
+			else
+			{
+				std::cout << '\t' << token.value(input) << '\t' << token.type() << '\t' << token.subtype() << std::endl;
+			}
+		}
+
+		auto rt = rebuild_formula(tokens, input);
+		std::cout << rt << std::endl;
+
         std::cout << std::endl;
+
     }
+
+   
 
     return 0;
 }
