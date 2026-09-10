@@ -308,30 +308,7 @@ namespace xlfparser {
                     formula[token.start()] == XLFP_CHAR('-') ||
                     formula[token.start()] == XLFP_CHAR('+')))
             {
-                // If the previous token was function, expression, postfix operator or operand, this token
-                // is an infix operator of subtype math.
-                if (iter > tokens.begin())
-                {
-                    auto& previous = *(iter-1);
-                    if ((previous.type() == Token::Type::Function && previous.subtype() == Token::Subtype::Stop) ||
-                        (previous.type() == Token::Type::Subexpression && previous.subtype() == Token::Subtype::Stop) ||
-                        (previous.type() == Token::Type::OperatorPostfix) ||
-                        (previous.type() == Token::Type::Operand))
-                    {
-                        token.subtype(Token::Subtype::Math);
-                        continue;
-                    }
-                }
-
-                // Otherwise assume it's a prefix operator
-                token.type(Token::Type::OperatorPrefix);
-                token.subtype(Token::Subtype::Math);
-                continue;
-            }
-
-            if (token.type() == Token::Type::OperatorInfix && formula[token.start()] == XLFP_CHAR('+'))
-            {
-                // If the previous token  was function, expression, postfix operator or operand, this token
+                // If the previous token was a function, expression, postfix operator or operand, this token
                 // is an infix operator of subtype math.
                 if (iter > tokens.begin())
                 {
