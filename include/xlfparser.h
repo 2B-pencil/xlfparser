@@ -420,7 +420,7 @@ namespace xlfparser {
         const auto left_brace = options.left_brace.value_or(XLFP_CHAR('{'));
         const auto right_brace = options.right_brace.value_or(XLFP_CHAR('}'));
         const auto left_bracket = options.left_bracket.value_or(XLFP_CHAR('['));
-        const auto right_bracket = options.right_brace.value_or(XLFP_CHAR(']'));
+        const auto right_bracket = options.right_bracket.value_or(XLFP_CHAR(']'));
         const auto list_separator = options.list_separator.value_or(XLFP_CHAR(','));
         const auto decimal_separator = options.decimal_separator.value_or(XLFP_CHAR('.'));
         const auto row_separator = options.row_separator.value_or(XLFP_CHAR(';'));

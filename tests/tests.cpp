@@ -480,6 +480,76 @@ TEST_CASE("Arrays with inner functions using different locale are parsed correct
     CHECK(result[15].subtype() == Token::Subtype::Stop);
 }
 
+TEST_CASE("Bracketed references are parsed correctly", "[xlfparser]")
+{
+    std::string formula("=[Book1]Sheet1!A1+1");
+    auto result = tokenize(formula);
+
+    REQUIRE(result.size() == 3);
+
+    CHECK_THAT(result[0].value(formula), Equals("[Book1]Sheet1!A1"));
+    CHECK(result[0].type() == Token::Type::Operand);
+
+    CHECK_THAT(result[1].value(formula), Equals("+"));
+    CHECK(result[1].type() == Token::Type::OperatorInfix);
+
+    CHECK_THAT(result[2].value(formula), Equals("1"));
+    CHECK(result[2].type() == Token::Type::Operand);
+}
+
+
+TEST_CASE("Bracketed references are parsed correctly with options set", "[xlfparser]")
+{
+    // A caller reading all of these from the host application sets them all,
+    // even where they match the defaults. Setting the brace options must not
+    // change which character closes a bracketed reference.
+    std::string formula("=[Book1]Sheet1!A1+1");
+    auto result = tokenize(formula, {
+        .left_brace = '{',
+        .right_brace = '}',
+        .left_bracket = '[',
+        .right_bracket = ']',
+        .list_separator = ',',
+        .decimal_separator = '.',
+        .row_separator = ';'
+    });
+
+    REQUIRE(result.size() == 3);
+
+    CHECK_THAT(result[0].value(formula), Equals("[Book1]Sheet1!A1"));
+    CHECK(result[0].type() == Token::Type::Operand);
+
+    CHECK_THAT(result[1].value(formula), Equals("+"));
+    CHECK(result[1].type() == Token::Type::OperatorInfix);
+
+    CHECK_THAT(result[2].value(formula), Equals("1"));
+    CHECK(result[2].type() == Token::Type::Operand);
+}
+
+
+TEST_CASE("Bracketed references honour the bracket options", "[xlfparser]")
+{
+    // Both bracket characters replaced, so a formula using the defaults would
+    // not tokenize the same way.
+    std::string formula("=<Book1>Sheet1!A1+1");
+    auto result = tokenize(formula, {
+        .left_bracket = '<',
+        .right_bracket = '>'
+    });
+
+    REQUIRE(result.size() == 3);
+
+    CHECK_THAT(result[0].value(formula), Equals("<Book1>Sheet1!A1"));
+    CHECK(result[0].type() == Token::Type::Operand);
+
+    CHECK_THAT(result[1].value(formula), Equals("+"));
+    CHECK(result[1].type() == Token::Type::OperatorInfix);
+
+    CHECK_THAT(result[2].value(formula), Equals("1"));
+    CHECK(result[2].type() == Token::Type::Operand);
+}
+
+
 TEST_CASE("Invalid formula expressions throw an exception", "[xlfparser]")
 {
     REQUIRE_THROWS_WITH(tokenize(std::string_view("=}")), Contains("Mismatched braces"));
