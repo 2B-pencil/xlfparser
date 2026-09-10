@@ -408,7 +408,7 @@ namespace xlfparser {
         // This matches a number in scientific notation with or without numbers after the + or -.
         // It's used to test for SN numbers before checking for +/- operators.
         std::basic_stringstream<char_type> sn_regex_ss;
-        sn_regex_ss << R"(^[1-9](\)" << decimal_separator << R"(\d+)?E[+-]\d*$)";
+        sn_regex_ss << R"(^\d+(\)" << decimal_separator << R"(\d+)?E[+-]\d*$)";
         const std::basic_regex<char_type> sn_regex(sn_regex_ss.str(),
             std::regex_constants::ECMAScript |
             std::regex_constants::icase);

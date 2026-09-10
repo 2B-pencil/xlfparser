@@ -146,6 +146,48 @@ TEST_CASE("Scientific notation parses correctly", "[xlfparser]")
 }
 
 
+TEST_CASE("Scientific notation with a multi digit mantissa parses correctly", "[xlfparser]")
+{
+    // The exponent sign has to be recognised as part of the number rather than
+    // as an operator, however many digits precede the E.
+    std::string formula("=10E+5-3");
+    auto result = tokenize(formula);
+
+    REQUIRE(result.size() == 3);
+
+    CHECK_THAT(result[0].value(formula), Equals("10E+5"));
+    CHECK(result[0].type() == Token::Type::Operand);
+    CHECK(result[0].subtype() == Token::Subtype::Number);
+
+    CHECK_THAT(result[1].value(formula), Equals("-"));
+    CHECK(result[1].type() == Token::Type::OperatorInfix);
+
+    CHECK_THAT(result[2].value(formula), Equals("3"));
+    CHECK(result[2].type() == Token::Type::Operand);
+    CHECK(result[2].subtype() == Token::Subtype::Number);
+}
+
+
+TEST_CASE("Scientific notation with a leading zero parses correctly", "[xlfparser]")
+{
+    std::string formula("=0.5E-10+3");
+    auto result = tokenize(formula);
+
+    REQUIRE(result.size() == 3);
+
+    CHECK_THAT(result[0].value(formula), Equals("0.5E-10"));
+    CHECK(result[0].type() == Token::Type::Operand);
+    CHECK(result[0].subtype() == Token::Subtype::Number);
+
+    CHECK_THAT(result[1].value(formula), Equals("+"));
+    CHECK(result[1].type() == Token::Type::OperatorInfix);
+
+    CHECK_THAT(result[2].value(formula), Equals("3"));
+    CHECK(result[2].type() == Token::Type::Operand);
+    CHECK(result[2].subtype() == Token::Subtype::Number);
+}
+
+
 TEST_CASE("Scientific notation parses correctly with different locale", "[xlfparser]")
 {
     std::string formula("=2,5E+10-3");
