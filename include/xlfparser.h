@@ -308,30 +308,7 @@ namespace xlfparser {
                     formula[token.start()] == XLFP_CHAR('-') ||
                     formula[token.start()] == XLFP_CHAR('+')))
             {
-                // If the previous token was function, expression, postfix operator or operand, this token
-                // is an infix operator of subtype math.
-                if (iter > tokens.begin())
-                {
-                    auto& previous = *(iter-1);
-                    if ((previous.type() == Token::Type::Function && previous.subtype() == Token::Subtype::Stop) ||
-                        (previous.type() == Token::Type::Subexpression && previous.subtype() == Token::Subtype::Stop) ||
-                        (previous.type() == Token::Type::OperatorPostfix) ||
-                        (previous.type() == Token::Type::Operand))
-                    {
-                        token.subtype(Token::Subtype::Math);
-                        continue;
-                    }
-                }
-
-                // Otherwise assume it's a prefix operator
-                token.type(Token::Type::OperatorPrefix);
-                token.subtype(Token::Subtype::Math);
-                continue;
-            }
-
-            if (token.type() == Token::Type::OperatorInfix && formula[token.start()] == XLFP_CHAR('+'))
-            {
-                // If the previous token  was function, expression, postfix operator or operand, this token
+                // If the previous token was a function, expression, postfix operator or operand, this token
                 // is an infix operator of subtype math.
                 if (iter > tokens.begin())
                 {
@@ -420,7 +397,7 @@ namespace xlfparser {
         const auto left_brace = options.left_brace.value_or(XLFP_CHAR('{'));
         const auto right_brace = options.right_brace.value_or(XLFP_CHAR('}'));
         const auto left_bracket = options.left_bracket.value_or(XLFP_CHAR('['));
-        const auto right_bracket = options.right_brace.value_or(XLFP_CHAR(']'));
+        const auto right_bracket = options.right_bracket.value_or(XLFP_CHAR(']'));
         const auto list_separator = options.list_separator.value_or(XLFP_CHAR(','));
         const auto decimal_separator = options.decimal_separator.value_or(XLFP_CHAR('.'));
         const auto row_separator = options.row_separator.value_or(XLFP_CHAR(';'));
@@ -431,7 +408,7 @@ namespace xlfparser {
         // This matches a number in scientific notation with or without numbers after the + or -.
         // It's used to test for SN numbers before checking for +/- operators.
         std::basic_stringstream<char_type> sn_regex_ss;
-        sn_regex_ss << R"(^[1-9](\)" << decimal_separator << R"(\d+)?E[+-]\d*$)";
+        sn_regex_ss << R"(^\d+(\)" << decimal_separator << R"(\d+)?E[+-]\d*$)";
         const std::basic_regex<char_type> sn_regex(sn_regex_ss.str(),
             std::regex_constants::ECMAScript |
             std::regex_constants::icase);
